@@ -1,1 +1,0 @@
-{"buildCommand": "npm run build", "outputDirectory": "out", "installCommand": "npm install", "framework": "nextjs", "regions": ["cdg1"], "env": {"NEXT_PUBLIC_APP_NAME": "RealtyMatch CRM", "NEXT_PUBLIC_APP_DESCRIPTION": "Real Estate Management Platform"}}
