@@ -26,6 +26,7 @@ export default function InteractiveDemo() {
     type: string
   } | null>(null)
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [showProPopup, setShowProPopup] = useState(false)
 
   useEffect(() => {
     // Initialize demo data on component mount
@@ -85,6 +86,10 @@ export default function InteractiveDemo() {
   const handleCloseDocumentModal = () => {
     setIsDocumentModalOpen(false)
     setSelectedDocument(null)
+  }
+
+  const handleImportQuick = (platform: string) => {
+    setShowProPopup(true)
   }
 
   const handleImportLead = () => {
@@ -269,22 +274,16 @@ export default function InteractiveDemo() {
               <div className="mb-4">
                 <label className="text-xs font-medium text-white/50 mb-2 block">Import Rapide</label>
                 <div className="grid grid-cols-3 gap-1">
-                  <button className="py-2 px-1 bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-500/30 rounded-lg transition-all flex flex-col items-center gap-1">
-                    <div className="w-4 h-4 bg-orange-500 rounded flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">M</span>
-                    </div>
+                  <button onClick={() => handleImportQuick('Mubawab')} className="py-2 px-1 bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-500/30 rounded-lg transition-all flex flex-col items-center gap-1">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaXq1z9J_jbq9IL3rtge-ux6tMWkDEzjpOOg&s" alt="Mubawab" className="w-4 h-4 object-contain rounded-md" />
                     <span className="text-xs text-white/70">Mubawab</span>
                   </button>
-                  <button className="py-2 px-1 bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/30 rounded-lg transition-all flex flex-col items-center gap-1">
-                    <div className="w-4 h-4 bg-blue-500 rounded flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">A</span>
-                    </div>
+                  <button onClick={() => handleImportQuick('Avito')} className="py-2 px-1 bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/30 rounded-lg transition-all flex flex-col items-center gap-1">
+                    <img src="https://media.licdn.com/dms/image/v2/C560BAQGQ5S6W_8uNAw/company-logo_200_200/company-logo_200_200/0/1630668105641/avitomaroc_logo?e=2147483647&v=beta&t=p3gjfbogjUNTKt41uH1Luu7UDcgrrSRpDvkWm-_u0FQ" alt="Avito" className="w-4 h-4 object-contain rounded-md" />
                     <span className="text-xs text-white/70">Avito</span>
                   </button>
-                  <button className="py-2 px-1 bg-white/5 hover:bg-green-500/20 border border-white/10 hover:border-green-500/30 rounded-lg transition-all flex flex-col items-center gap-1">
-                    <div className="w-4 h-4 bg-green-500 rounded flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">S</span>
-                    </div>
+                  <button onClick={() => handleImportQuick('Sarouty')} className="py-2 px-1 bg-white/5 hover:bg-green-500/20 border border-white/10 hover:border-green-500/30 rounded-lg transition-all flex flex-col items-center gap-1">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_6Y1T---8gqPlK0ajFaLGN8W9p7o-0g7QeQ&s" alt="Sarouty" className="w-4 h-4 object-contain rounded-md" />
                     <span className="text-xs text-white/70">Sarouty</span>
                   </button>
                 </div>
@@ -649,6 +648,68 @@ export default function InteractiveDemo() {
         onClose={handleCloseDocumentModal}
         document={selectedDocument}
       />
+
+      {/* PRO Popup Modal */}
+      {showProPopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="glass rounded-2xl border border-white/20 p-6 max-w-md w-full mx-4 transform transition-all">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-kommo-primary to-kommo-secondary flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Fonctionnalité Premium</h3>
+                  <p className="text-sm text-white/60">Pack PRO requis</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowProPopup(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              >
+                <span className="text-white/60 hover:text-white text-xl">×</span>
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-white/70 mb-4">
+                L'import automatique depuis Mubawab, Avito et Sarouty est disponible exclusivement dans le pack PRO.
+              </p>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-white/60">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span>Import automatique des annonces</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-white/60">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span>Synchronisation en temps réel</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-white/60">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span>Mise à jour automatique des stocks</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-white/60">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span>Support prioritaire 24/7</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button 
+                onClick={() => {
+                  setShowProPopup(false)
+                  window.open('https://inspirigence-consulting.com/immobilier#packages', '_blank')
+                }}
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-kommo-primary to-kommo-secondary hover:shadow-lg hover:shadow-kommo-primary/30 text-white text-sm font-medium rounded-lg transition-all"
+              >
+                Découvrir le pack PRO
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
