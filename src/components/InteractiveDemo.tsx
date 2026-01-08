@@ -27,6 +27,7 @@ export default function InteractiveDemo() {
     type: string
   } | null>(null)
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [firstName, setFirstName] = useState('')
   const [showProPopup, setShowProPopup] = useState(false)
   const [savedNumbers, setSavedNumbers] = useState<string[]>([])
   const [isCreatingLead, setIsCreatingLead] = useState(false)
@@ -74,6 +75,11 @@ export default function InteractiveDemo() {
   }
 
   const handleSendBrochure = async () => {
+    if (!firstName.trim()) {
+      alert('Veuillez saisir votre prénom')
+      return
+    }
+    
     if (!phoneNumber.trim()) {
       alert('Veuillez saisir un numéro de téléphone')
       return
@@ -90,7 +96,7 @@ export default function InteractiveDemo() {
       
       // 3. Créer un lead dans Tilda
       const tildaResult = await tildaIntegration.createLead({
-        name: selectedLead?.name || 'Lead Demo',
+        name: firstName,
         phone: phoneNumber,
         email: selectedLead?.email,
         formname: 'RealtyMatch Brochure Request',
@@ -108,8 +114,9 @@ export default function InteractiveDemo() {
         alert(`⚠️ Brochure envoyée via WhatsApp au ${phoneNumber}!\n\n❌ Erreur lors de la création du lead Tilda:\n${tildaResult.message}\n\nLe numéro a été enregistré localement.`)
       }
       
-      // 5. Vider le champ après envoi
+      // 5. Vider les champs après envoi
       setPhoneNumber('')
+      setFirstName('')
       
     } catch (error) {
       console.error('Erreur lors de l\'envoi:', error)
@@ -566,7 +573,14 @@ export default function InteractiveDemo() {
                     <div className="absolute top-2 right-2 px-2 py-0.5 bg-green-500 text-white text-xs font-bold rounded">PDF</div>
                   </div>
                   <p className="text-sm text-white/70 mt-3 mb-1">Recevez la présentation par WhatsApp :</p>
-                  <div className="mt-3">
+                  <div className="mt-3 space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Votre prénom"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 text-sm focus:outline-none focus:border-kommo-primary focus:bg-white/15 transition-all"
+                    />
                     <input
                       type="tel"
                       placeholder="0612345678"
