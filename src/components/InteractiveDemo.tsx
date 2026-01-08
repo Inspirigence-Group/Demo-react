@@ -10,9 +10,10 @@ import {
 } from 'lucide-react'
 import { formatCurrency, getScoreColor, getScoreBgColor } from '@/lib/utils'
 import DocumentModal from './DocumentModal'
+import { tildaIntegration } from '@/lib/tilda-integration'
 
 export default function InteractiveDemo() {
-  const { leads, properties, selectedLead, setSelectedLead, addLead, addProperty, initializeDemoData, canCreateLead, maxAdditionalLeads, additionalLeadsCreated } = useStore()
+  const { leads, properties, selectedLead, setSelectedLead, addLead, addProperty, initializeDemoData, canCreateLead, maxAdditionalLeads, additionalLeadsCreated, phoneNumbers, addPhoneNumber } = useStore()
   const [matchingEngine] = useState(() => new MatchingEngine())
   const [matches, setMatches] = useState<MatchResult[]>([])
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
@@ -27,11 +28,18 @@ export default function InteractiveDemo() {
   } | null>(null)
   const [phoneNumber, setPhoneNumber] = useState('')
   const [showProPopup, setShowProPopup] = useState(false)
+  const [savedNumbers, setSavedNumbers] = useState<string[]>([])
+  const [isCreatingLead, setIsCreatingLead] = useState(false)
 
   useEffect(() => {
     // Initialize demo data on component mount
     initializeDemoData()
   }, [initializeDemoData])
+
+  useEffect(() => {
+    // Update saved numbers when they change in the store
+    setSavedNumbers(phoneNumbers)
+  }, [phoneNumbers])
 
   useEffect(() => {
     if (selectedLead && properties.length > 0) {
@@ -65,13 +73,50 @@ export default function InteractiveDemo() {
     setCurrentStep(4)
   }
 
-  const handleSendBrochure = () => {
+  const handleSendBrochure = async () => {
     if (!phoneNumber.trim()) {
       alert('Veuillez saisir un numéro de téléphone')
       return
     }
-    // Simulate sending
-    alert(`Brochure envoyée via WhatsApp au ${phoneNumber}!`)
+    
+    setIsCreatingLead(true)
+    
+    try {
+      // 1. Enregistrer le numéro de téléphone dans le store
+      addPhoneNumber(phoneNumber)
+      
+      // 2. Mettre à jour la liste locale des numéros sauvegardés
+      setSavedNumbers(prev => [...prev, phoneNumber])
+      
+      // 3. Créer un lead dans Tilda
+      const tildaResult = await tildaIntegration.createLead({
+        name: selectedLead?.name || 'Lead Demo',
+        phone: phoneNumber,
+        email: selectedLead?.email,
+        formname: 'RealtyMatch Brochure Request',
+        // Ajouter des informations sur le bien sélectionné
+        propertyTitle: selectedProperty?.title,
+        propertyPrice: selectedProperty?.price,
+        propertyLocation: selectedProperty?.location,
+        source: 'realty-match-demo'
+      })
+      
+      // 4. Afficher le résultat
+      if (tildaResult.success) {
+        alert(`✅ Brochure envoyée via WhatsApp au ${phoneNumber}!\n\n🎯 Lead Tilda créé avec succès!\nID: ${tildaResult.leadId}\n\nNuméro enregistré avec succès.`)
+      } else {
+        alert(`⚠️ Brochure envoyée via WhatsApp au ${phoneNumber}!\n\n❌ Erreur lors de la création du lead Tilda:\n${tildaResult.message}\n\nLe numéro a été enregistré localement.`)
+      }
+      
+      // 5. Vider le champ après envoi
+      setPhoneNumber('')
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi:', error)
+      alert(`❌ Erreur technique lors de l'envoi. Veuillez réessayer.\n\nLe numéro ${phoneNumber} a été enregistré localement.`)
+    } finally {
+      setIsCreatingLead(false)
+    }
   }
 
   const handleDocumentClick = (title: string, filename: string) => {
@@ -532,11 +577,42 @@ export default function InteractiveDemo() {
                   </div>
                   <button 
                     onClick={handleSendBrochure}
-                    className="w-full mt-2 py-2.5 px-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2"
+                    disabled={isCreatingLead}
+                    className="w-full mt-2 py-2.5 px-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Send className="w-4 h-4" />
-                    Envoyer via WhatsApp
+                    {isCreatingLead ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Création du lead...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        Envoyer via WhatsApp
+                      </>
+                    )}
                   </button>
+                  
+                  {/* Affichage des numéros sauvegardés */}
+                  {savedNumbers.length > 0 && (
+                    <div className="mt-3 p-2 bg-white/5 rounded-lg border border-white/10">
+                      <div className="text-xs text-white/50 mb-1">Numéros enregistrés :</div>
+                      <div className="space-y-1">
+                        {savedNumbers.slice(-3).map((number, index) => (
+                          <div key={index} className="text-xs text-green-400 flex items-center gap-1">
+                            <Check className="w-3 h-3" />
+                            {number}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-white/10">
+                        <div className="text-xs text-white/30 flex items-center gap-1">
+                          <Zap className="w-3 h-3" />
+                          Leads Tilda créés automatiquement
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

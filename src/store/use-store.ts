@@ -10,6 +10,9 @@ interface Store {
   selectedProperty: Property | null;
   stats: DashboardStats | null;
   
+  // Phone numbers storage
+  phoneNumbers: string[];
+  
   // UI State
   isLoading: boolean;
   error: string | null;
@@ -42,6 +45,10 @@ interface Store {
   addMatch: (match: MatchResult) => void;
   removeMatch: (leadId: string, propertyId: string) => void;
   
+  // Phone number actions
+  addPhoneNumber: (phone: string) => void;
+  getPhoneNumbers: () => string[];
+  
   // Initialize with demo data
   initializeDemoData: () => void;
 }
@@ -54,6 +61,7 @@ export const useStore = create<Store>((set, get) => ({
   selectedLead: null,
   selectedProperty: null,
   stats: null,
+  phoneNumbers: [],
   isLoading: false,
   error: null,
   
@@ -117,6 +125,18 @@ export const useStore = create<Store>((set, get) => ({
       !(match.lead.id === leadId && match.property.id === propertyId)
     )
   })),
+  
+  // Phone number actions
+  addPhoneNumber: (phone: string) => set((state) => {
+    if (!state.phoneNumbers.includes(phone)) {
+      return { phoneNumbers: [...state.phoneNumbers, phone] };
+    }
+    return state;
+  }),
+  getPhoneNumbers: () => {
+    const state = get();
+    return state.phoneNumbers;
+  },
   
   // Initialize demo data
   initializeDemoData: () => {
@@ -751,7 +771,7 @@ export const useStore = create<Store>((set, get) => ({
     ];
     
     const demoStats: DashboardStats = {
-      totalLeads: demoLeads.length,
+      totalLeads: 3,
       totalProperties: demoProperties.length,
       activeMatches: 8,
       conversionRate: 23.5,
@@ -761,7 +781,7 @@ export const useStore = create<Store>((set, get) => ({
     };
     
     set({
-      leads: demoLeads,
+      leads: demoLeads.slice(0, 3),
       properties: demoProperties,
       matches: [],
       stats: demoStats
